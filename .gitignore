@@ -1,0 +1,25 @@
+out
+dist
+node_modules
+.vscode-test/
+*.vsix
+
+# 忽略资源文件（如果你不想公开，比如 CSV/json）
+/assets/
+
+
+# 忽略 macOS 系统文件
+.DS_Store
+
+# 忽略 VSCode 本地配置
+.vscode/
+
+# TypeScript 编译缓存
+*.tsbuildinfo
+
+# 日志文件
+*.log
+
+# 临时文件
+*.tmp
+*.swp
