@@ -1,11 +1,17 @@
 {
   "name": "field-operator-hints",
+  "publisher": "Roshameow",
   "displayName": "brain_snippet",
   "description": "worldquant brain platform datafields and operators autocompletion",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.98.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/roshameow/field-operator-hints.git"
+  },
+  "icon": "assets/logo.png",
   "categories": [
     "Other"
   ],

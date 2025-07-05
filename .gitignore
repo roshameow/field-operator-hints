@@ -6,7 +6,7 @@ node_modules
 
 # 忽略资源文件（如果你不想公开，比如 CSV/json）
 /assets/
-
+test.py
 
 # 忽略 macOS 系统文件
 .DS_Store
