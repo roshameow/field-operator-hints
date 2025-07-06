@@ -5,28 +5,50 @@ import * as path from 'path';
 interface OperatorInfo {
 	name: string;
 	category: string;
-	scope: string[];
 	definition: string;
 	description: string;
-	documentation?: string | null;
 }
 
 function loadOperators(context: vscode.ExtensionContext): OperatorInfo[] {
-	const jsonPath = path.join(context.extensionPath, 'assets', 'operators_2025.json');
-	const content = fs.readFileSync(jsonPath, 'utf-8');
-	const data = JSON.parse(content);
-	return data as OperatorInfo[];
+	const config = vscode.workspace.getConfiguration('fieldOperatorHints');
+	const customPath = config.get<string>('customOperatorJsonPath');
+	let finalPath = '';
+
+	if (customPath && customPath.trim()) {
+		if (path.isAbsolute(customPath)) {
+			finalPath = customPath;
+		} else {
+			const workspace = vscode.workspace.workspaceFolders?.[0];
+			if (workspace) {
+				finalPath = path.join(workspace.uri.fsPath, customPath);
+			}
+		}
+	} else {
+		finalPath = path.join(context.extensionPath, 'assets', 'operators_2025.json');
+	}
+
+	if (!fs.existsSync(finalPath)) {
+		vscode.window.showErrorMessage(`❌ Operator JSON not found: ${finalPath}`);
+		return [];
+	}
+
+	try {
+		const raw = fs.readFileSync(finalPath, 'utf-8');
+		const json = JSON.parse(raw);
+		return json as OperatorInfo[];
+	} catch (err) {
+		vscode.window.showErrorMessage(`❌ Failed to parse operator JSON: ${err}`);
+		return [];
+	}
 }
 
 export function activate(context: vscode.ExtensionContext) {
-	console.log('✅ Extension activated!');
-	vscode.window.showInformationMessage('🧠 Operator Hint Extension Activated!');
+	console.log('✅ Field Operator Hints activated');
 
 	const operators = loadOperators(context);
 
-	// Completion
 	const completionProvider = vscode.languages.registerCompletionItemProvider(
-		{ scheme: 'file', language: 'python' }, // 可根据需要改语言
+		{ scheme: 'file', language: 'python' },
 		{
 			provideCompletionItems() {
 				return operators.map(op => {
@@ -40,22 +62,20 @@ export function activate(context: vscode.ExtensionContext) {
 		...'abcdefghijklmnopqrstuvwxyz_'.split('')
 	);
 
-	// Hover
 	const hoverProvider = vscode.languages.registerHoverProvider(
 		{ scheme: 'file', language: 'python' },
 		{
 			provideHover(document, position) {
 				const word = document.getText(document.getWordRangeAtPosition(position));
-				const match = operators.find(op => op.name === word);
-				if (match) {
-					const md = new vscode.MarkdownString();
-					md.appendMarkdown(`### ${match.name} (${match.category})\n`);
-					md.appendCodeblock(match.definition, 'python');
-					md.appendMarkdown(`\n\n${match.description}`);
-					if (match.documentation) {
-						md.appendMarkdown(`\n\n[Docs](${match.documentation})`);
-					}
-					return new vscode.Hover(md);
+				const op = operators.find(o => o.name === word);
+				if (op) {
+					return new vscode.Hover([
+						`**${op.name}** (${op.category})`,
+						'',
+						'```python\n' + op.definition + '\n```',
+						'',
+						op.description
+					]);
 				}
 			}
 		}

@@ -19,34 +19,45 @@
 
 ---
 
-## 📄 替换 JSON 示例
+## 🔧 自定义 Operator JSON 文件支持
 
-你可以按以下方式替换 `assets/operators_2025.json` 来描述新的运算符和字段：
+本插件默认使用内置的 `assets/operators_2025.json` 文件提供自动补全与悬浮提示功能。但你也可以通过 VS Code 设置项，指定自己的 JSON 文件路径。
 
-### 示例 1: `add` 运算符
+### ✅ 配置方式
 
-```json
+在你的 VS Code 设置中添加以下字段（可在全局或项目的 `.vscode/settings.json` 中配置）：
+
+```jsonc
 {
-  "name": "add",
-  "category": "Arithmetic",
-  "scope": ["COMBO", "REGULAR", "SELECTION"],
-  "definition": "add(x, y, filter = false), x + y",
-  "description": "Add all inputs (at least 2 inputs required). If filter = true, filter all input NaN to 0 before adding",
-  "documentation": null,
-  "level": "ALL",
-  "details": null,
-  "content": null,
-  "lastModified": null
+  "fieldOperatorHints.customOperatorJsonPath": "./my_operators.json"
 }
 ```
 
-### 如何替换 JSON？
+### 📌 路径说明
 
-1. 将 `JSON` 格式的数据替换成你自己定义的运算符和字段。
-2. 确保 `name`, `category`, `definition`, `description` 等字段的内容与你的需求匹配。
-3. 保存修改后的 `JSON` 文件。
+* **相对路径**：以项目根目录为基准，例如 `./my_operators.json`
+* **绝对路径**：支持 `/Users/xxx/path/to/operators.json` 这种形式
 
-你可以根据需要新增运算符或字段，只需遵循相同的格式。
+如果没有配置，插件将使用默认内置文件 `assets/operators_2025.json`。
+
+---
+
+## 📄 JSON 文件格式要求
+
+你的自定义 JSON 文件应为数组格式，元素结构如下：
+
+```json
+[
+  {
+    "name": "add",
+    "category": "Arithmetic",
+    "definition": "add(x, y, filter=false), x + y",
+    "description": "Add all inputs. If filter=true, NaN will be treated as 0."
+  },
+  ...
+]
+```
+
 
 ---
 
@@ -86,4 +97,6 @@ vsce package
 1. 在 VSCode 中打开插件项目。
 2. 按 `F5` 运行插件，VSCode 会自动启动一个新的窗口来加载并调试插件。
 3. 在 `View -> Output -> Extension Host` 查看调试日志，检查插件是否正确加载。
+
+当然可以，下面是适合放入你插件项目 `README.md` 文件中的**中文使用说明**部分，专门介绍如何使用自定义 JSON 文件配置：
 
