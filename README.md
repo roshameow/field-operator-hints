@@ -1,8 +1,9 @@
+
 # Brain DataField & Operator IntelliSense
 
 一个轻量级的 VSCode 插件，提供**悬停文档**和**自动补全**功能，用于自定义的**数据字段**和**运算符**，基于你自己的 JSON 文档。
 
-非常适用于领域特定语言（DSL）、金融建模 DSL 或者内部运算符库。
+非常适用于领域特定语言（DSL）、金融建模 DSL 或内部运算符库。
 
 ---
 
@@ -14,18 +15,19 @@
 ✅ **自动补全建议**
 输入运算符或字段名称时，提供智能、上下文感知的自动补全。
 
+✅ **Region → Universe / Neutralization 联动提示**
+支持从配置的 setting\_snapshot.json 中读取 `region`、`universe`、`neutralization` 的级联提示。
+
 ✅ **基于 JSON 的文档**
 通过一个或多个 `.json` 文件来描述你的内部字段/运算符文档，便于维护和扩展。
 
 ---
 
-## 🔧 自定义 Operator JSON 文件支持
+## 🔧 自定义配置
 
-本插件默认使用内置的 `assets/operators_2025.json` 文件提供自动补全与悬浮提示功能。但你也可以通过 VS Code 设置项，指定自己的 JSON 文件路径。
+### ✅ 自定义 Operator JSON 文件路径
 
-### ✅ 配置方式
-
-在你的 VS Code 设置中添加以下字段（可在全局或项目的 `.vscode/settings.json` 中配置）：
+插件默认读取内置的 `assets/operators_2025.json` 文件。你可以通过 VS Code 设置指定自己的 JSON 文件路径：
 
 ```jsonc
 {
@@ -33,18 +35,26 @@
 }
 ```
 
+### ✅ 自定义 Region 设置 JSON（setting\_snapshot.json）路径
+
+如果你有自己的 `setting_snapshot.json` 文件用于 Region → Universe、Neutralization 的枚举配置，也可以指定路径：
+
+```jsonc
+{
+  "fieldOperatorHints.customRegionSettingJsonPath": "./my_setting_snapshot.json"
+}
+```
+
 ### 📌 路径说明
 
-* **相对路径**：以项目根目录为基准，例如 `./my_operators.json`
-* **绝对路径**：支持 `/Users/xxx/path/to/operators.json` 这种形式
-
-如果没有配置，插件将使用默认内置文件 `assets/operators_2025.json`。
+* **相对路径**：以项目根目录为基准（推荐），例如：`./my_operators.json`
+* **绝对路径**：完整路径，例如：`/Users/yourname/project/operators.json`
 
 ---
 
 ## 📄 JSON 文件格式要求
 
-你的自定义 JSON 文件应为数组格式，元素结构如下：
+### Operator JSON
 
 ```json
 [
@@ -58,6 +68,54 @@
 ]
 ```
 
+### Region Setting JSON（符合 WorldQuant Brain 风格）
+
+需包含如下字段嵌套结构：
+
+```jsonc
+{
+  "actions": {
+    "POST": {
+      "settings": {
+        "children": {
+          "region": {
+            "choices": {
+              "instrumentType": {
+                "EQUITY": [ ... ]
+              }
+            }
+          },
+          "universe": {
+            "choices": {
+              "instrumentType": {
+                "EQUITY": {
+                  "region": {
+                    "USA": [ ... ],
+                    "GLB": [ ... ]
+                  }
+                }
+              }
+            }
+          },
+          "neutralization": {
+            "choices": {
+              "instrumentType": {
+                "EQUITY": {
+                  "region": {
+                    "USA": [ ... ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+插件会自动提取可用的 Region、与其对应的 Universe / Neutralization 枚举项，并在 Python 文件中提供智能提示。
 
 ---
 
