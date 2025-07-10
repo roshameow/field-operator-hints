@@ -119,6 +119,24 @@
 
 ---
 
+## 💡 使用建议（强烈推荐）
+
+为了在字符串中（例如 `"TOP1000"`、`'REVERSION_AND_MOMENTUM'`）也能正常触发自动补全，请在 VS Code 的设置中启用以下选项：
+
+### ✅ 开启字符串内自动补全
+
+打开你的用户设置（或项目 `.vscode/settings.json`），添加：
+
+```jsonc
+{
+  "editor.quickSuggestions": {
+    "strings": true
+  }
+}
+```
+
+---
+
 ## 💻 重新编译 VSIX 插件
 
 安装 `.vsix` 插件非常简单，只需按照以下步骤操作：
