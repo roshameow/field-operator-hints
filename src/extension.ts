@@ -108,8 +108,14 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const operators = loadOperators(context);
 
-	const completionProvider = vscode.languages.registerCompletionItemProvider(
+	const pythonSelectors = [
 		{ scheme: 'file', language: 'python' },
+		{ scheme: 'vscode-notebook-cell', language: 'python' }
+	];
+
+
+	const completionProvider = vscode.languages.registerCompletionItemProvider(
+		pythonSelectors,
 		{
 			provideCompletionItems() {
 				return operators.map(op => {
@@ -124,7 +130,7 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	const hoverProvider = vscode.languages.registerHoverProvider(
-		{ scheme: 'file', language: 'python' },
+		pythonSelectors,
 		{
 			provideHover(document, position) {
 				const word = document.getText(document.getWordRangeAtPosition(position));
@@ -149,7 +155,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const mergedUniverseMap = loadMergedRegionMap(context, 'universe');
 
 	const universeCompletionProvider = vscode.languages.registerCompletionItemProvider(
-		{ scheme: 'file', language: 'python' },
+		pythonSelectors,
 		{
 			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 				const lineText = document.lineAt(position).text;
@@ -188,7 +194,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const mergedNeutralMap = loadMergedRegionMap(context, 'neutralization');
 
 	const neutralizationCompletionProvider = vscode.languages.registerCompletionItemProvider(
-		{ scheme: 'file', language: 'python' },
+		pythonSelectors,
 		{
 			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 				const lineText = document.lineAt(position).text;
