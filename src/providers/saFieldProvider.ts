@@ -78,7 +78,7 @@ export function registerSaFieldProvider(
 
 
 	// --- Hover Provider ---
-	const saHoverProvider = vscode.languages.registerHoverItemProvider(
+	const saHoverProvider = vscode.languages.registerHoverProvider(
 		pythonSelectors,
 		{
 			provideHover(document, position) {
