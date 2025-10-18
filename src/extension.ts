@@ -1,233 +1,52 @@
 import * as vscode from 'vscode';
-import * as fs from 'fs';
-import * as path from 'path';
+import { loadOperators } from './loaders/operators';
+import { loadMergedRegionMap } from './loaders/neutralizations';
+import { loadSaFields } from './loaders/saFields';
 
-interface OperatorInfo {
-	name: string;
-	category: string;
-	definition: string;
-	description: string;
-}
-
-function loadOperators(context: vscode.ExtensionContext): OperatorInfo[] {
-	const config = vscode.workspace.getConfiguration('fieldOperatorHints');
-	const customPath = config.get<string>('customOperatorJsonPath');
-	let finalPath = '';
-
-	if (customPath && customPath.trim()) {
-		if (path.isAbsolute(customPath)) {
-			finalPath = customPath;
-		} else {
-			const workspace = vscode.workspace.workspaceFolders?.[0];
-			if (workspace) {
-				finalPath = path.join(workspace.uri.fsPath, customPath);
-			}
-		}
-	} else {
-		finalPath = path.join(context.extensionPath, 'assets', 'operators_2025.json');
-	}
-
-	if (!fs.existsSync(finalPath)) {
-		vscode.window.showErrorMessage(`❌ Operator JSON not found: ${finalPath}`);
-		return [];
-	}
-
-	try {
-		const raw = fs.readFileSync(finalPath, 'utf-8');
-		const json = JSON.parse(raw);
-		return json as OperatorInfo[];
-	} catch (err) {
-		vscode.window.showErrorMessage(`❌ Failed to parse operator JSON: ${err}`);
-		return [];
-	}
-}
-
-interface RegionMap {
-	[region: string]: string[];
-}
-
-function loadRegionMap(
-	context: vscode.ExtensionContext,
-	key: 'universe' | 'neutralization'
-): RegionMap {
-	try {
-		const config = vscode.workspace.getConfiguration('fieldOperatorHints');
-		const customPath = config.get<string>('customRegionSettingJsonPath');
-		let settingsPath = '';
-
-		if (customPath && customPath.trim()) {
-			if (path.isAbsolute(customPath)) {
-				settingsPath = customPath;
-			} else {
-				const workspace = vscode.workspace.workspaceFolders?.[0];
-				if (workspace) {
-					settingsPath = path.join(workspace.uri.fsPath, customPath);
-				}
-			}
-		} else {
-			settingsPath = path.join(context.extensionPath, 'assets', 'settings_snapshot.json');
-		}
-		const raw = fs.readFileSync(settingsPath, 'utf-8');
-		const json = JSON.parse(raw);
-
-		const equitySettings =
-			json.actions?.POST?.settings?.children?.[key]?.choices?.instrumentType?.EQUITY?.region || {};
-
-		const map: RegionMap = {};
-		for (const [region, values] of Object.entries(equitySettings)) {
-			map[region] = (values as any[]).map((v: any) => v.value);
-		}
-
-		return map;
-	} catch (err) {
-		console.warn(`⚠️ Failed to load ${key} from settings_snapshot.json:`, err);
-		return {};
-	}
-}
-
-function loadMergedRegionMap(
-	context: vscode.ExtensionContext,
-	key: 'universe' | 'neutralization'
-): Map<string, string[]> {
-	const regionToValues = loadRegionMap(context, key); // 复用你已有的函数
-	const valueToRegions = new Map<string, string[]>();
-
-	for (const [region, values] of Object.entries(regionToValues)) {
-		for (const value of values) {
-			if (!valueToRegions.has(value)) {
-				valueToRegions.set(value, []);
-			}
-			valueToRegions.get(value)!.push(region);
-		}
-	}
-	return valueToRegions;
-}
+// 各种 Provider 注册函数
+import { registerOperatorProvider } from './providers/operatorProvider';
+import { registerNeutralizationProvider } from './providers/neutralizationProvider';
+import { registerSaFieldProvider } from './providers/saFieldProvider';
 
 export function activate(context: vscode.ExtensionContext) {
-	console.log('✅ Field Operator Hints activated');
+    // --- 打印扩展信息 ---
+    const pkg = require(context.asAbsolutePath('package.json'));
+	const outputChannel = vscode.window.createOutputChannel('Field Operator Hints');
+	outputChannel.appendLine('🛠️ Activating Field Operator Hints...');
+	outputChannel.appendLine(`Extension path: ${context.extensionPath}`);
+	outputChannel.appendLine(`Version: ${pkg.version}`);
+	outputChannel.appendLine(`Publisher: ${pkg.publisher}`);
 
-	const operators = loadOperators(context);
-
+	// --- 通用语言选择器 ---
 	const pythonSelectors = [
 		{ scheme: 'file', language: 'python' },
 		{ scheme: 'vscode-notebook-cell', language: 'python' }
 	];
 
+	// === 1️⃣ 加载静态数据 ===
+	const operators = loadOperators(context);
+	outputChannel.appendLine(`Loaded ${operators.length} operators.`);
 
-	const completionProvider = vscode.languages.registerCompletionItemProvider(
-		pythonSelectors,
-		{
-			provideCompletionItems() {
-				return operators.map(op => {
-					const item = new vscode.CompletionItem(op.name, vscode.CompletionItemKind.Function);
-					item.detail = op.definition;
-					item.documentation = new vscode.MarkdownString(`**${op.category}**\n\n${op.description}`);
-					return item;
-				});
-			}
-		},
-		...'abcdefghijklmnopqrstuvwxyz_'.split('')
-	);
-
-	const hoverProvider = vscode.languages.registerHoverProvider(
-		pythonSelectors,
-		{
-			provideHover(document, position) {
-				const word = document.getText(document.getWordRangeAtPosition(position));
-				const op = operators.find(o => o.name === word);
-				if (op) {
-					return new vscode.Hover([
-						`**${op.name}** (${op.category})`,
-						'',
-						'```python\n' + op.definition + '\n```',
-						'',
-						op.description
-					]);
-				}
-			}
-		}
-	);
-
-	context.subscriptions.push(completionProvider, hoverProvider);
-
-
-	//region universe hints
 	const mergedUniverseMap = loadMergedRegionMap(context, 'universe');
+	outputChannel.appendLine(`Loaded ${mergedUniverseMap.size} universe entries.`);
 
-	const universeCompletionProvider = vscode.languages.registerCompletionItemProvider(
-		pythonSelectors,
-		{
-			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
-				const lineText = document.lineAt(position).text;
-				const lineUntilPos = lineText.slice(0, position.character);
-				const quoteMatch = lineUntilPos.match(/["']([\w\d_]*)$/);
-				const word = quoteMatch ? quoteMatch[1] : '';
-
-				const range = quoteMatch
-					? new vscode.Range(
-						position.line,
-						position.character - word.length,
-						position.line,
-						position.character
-					)
-					: undefined;
-
-				const items: vscode.CompletionItem[] = [];
-
-				for (const [value, regions] of mergedUniverseMap.entries()) {
-					if (!word || value.startsWith(word)) {
-						const item = new vscode.CompletionItem(value, vscode.CompletionItemKind.Value);
-						item.detail = `universe: ${regions.join(', ')}`;
-						item.sortText = '0_' + value;
-						if (range) item.range = range;
-						items.push(item);
-					}
-				}
-				return items;
-			}
-		},
-		...'"abcdefghijklmnopqrstuvwxyz_\''.split('')
-	);
-	context.subscriptions.push(universeCompletionProvider);
-
-	// region neutralization hints
 	const mergedNeutralMap = loadMergedRegionMap(context, 'neutralization');
+	outputChannel.appendLine(`Loaded ${mergedNeutralMap.size} neutralization entries.`);
 
-	const neutralizationCompletionProvider = vscode.languages.registerCompletionItemProvider(
-		pythonSelectors,
-		{
-			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
-				const lineText = document.lineAt(position).text;
-				const lineUntilPos = lineText.slice(0, position.character);
-				const quoteMatch = lineUntilPos.match(/["']([\w\d_]*)$/);
-				const word = quoteMatch ? quoteMatch[1] : '';
 
-				const range = quoteMatch
-					? new vscode.Range(
-						position.line,
-						position.character - word.length,
-						position.line,
-						position.character
-					)
-					: undefined;
+	const saFields = loadSaFields(context);
+	outputChannel.appendLine(`Loaded ${Object.keys(saFields).length} SA field groups.`);
 
-				const items: vscode.CompletionItem[] = [];
-
-				for (const [value, regions] of mergedNeutralMap.entries()) {
-					if (!word || value.startsWith(word)) {
-						const item = new vscode.CompletionItem(value, vscode.CompletionItemKind.Value);
-						item.detail = `neutralization: ${regions.join(', ')}`;
-						item.sortText = '0_' + value;
-						if (range) item.range = range;
-						items.push(item);
-					}
-				}
-				return items;
-			}
-		},
-		...'abcdefghijklmnopqrstuvwxyz_\''.split('')
+	// === 2️⃣ 注册所有 Provider ===
+	context.subscriptions.push(
+		...registerOperatorProvider(pythonSelectors, operators),
+		...registerNeutralizationProvider(pythonSelectors, mergedUniverseMap, mergedNeutralMap),
+		...registerSaFieldProvider(pythonSelectors, saFields)
 	);
-	context.subscriptions.push(neutralizationCompletionProvider);
 
+	vscode.window.showInformationMessage('✨ All providers registered successfully.');
+}
 
+export function deactivate() {
+	console.log('🛑 Field Operator Hints deactivated');
 }
