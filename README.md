@@ -1,4 +1,3 @@
-
 # Brain DataField & Operator IntelliSense
 
 一个轻量级的 VSCode 插件，提供**悬停文档**和**自动补全**功能，用于自定义的**数据字段**和**运算符**，基于你自己的 JSON 文档。
@@ -16,7 +15,10 @@
 输入运算符或字段名称时，提供智能、上下文感知的自动补全。
 
 ✅ **Region → Universe / Neutralization 联动提示**
-支持从配置的 setting\_snapshot.json 中读取 `region`、`universe`、`neutralization` 的级联提示。
+支持从配置的 setting_snapshot.json 中读取 `region`、`universe`、`neutralization` 的级联提示。
+
+✅ **SA Fields 动态补全**
+输入 `/` 触发 SA fields 补全。例如，输入 `/selection`，插件会提示 `selection: turnover` 等选项，选中后自动插入 `turnover`。
 
 ✅ **基于 JSON 的文档**
 通过一个或多个 `.json` 文件来描述你的内部字段/运算符文档，便于维护和扩展。
@@ -35,13 +37,23 @@
 }
 ```
 
-### ✅ 自定义 Region 设置 JSON（setting\_snapshot.json）路径
+### ✅ 自定义 Region 设置 JSON（setting_snapshot.json）路径
 
 如果你有自己的 `setting_snapshot.json` 文件用于 Region → Universe、Neutralization 的枚举配置，也可以指定路径：
 
 ```jsonc
 {
   "fieldOperatorHints.customRegionSettingJsonPath": "./my_setting_snapshot.json"
+}
+```
+
+### ✅ 自定义 SA Fields JSON 路径
+
+插件默认读取内置的 `assets/sa_fields.json`。你可以提供自己的 SA Fields 定义文件：
+
+```jsonc
+{
+  "fieldOperatorHints.customSaFieldsJsonPath": "./my_sa_fields.json"
 }
 ```
 
@@ -66,6 +78,22 @@
   },
   ...
 ]
+```
+
+### SA Fields JSON
+
+这是一个 `组名 -> 字段列表` 的映射：
+```json
+{
+  "selection": [
+    "turnover",
+    "author_fitness"
+  ],
+  "combo": [
+    "pnl",
+    "alpha"
+  ]
+}
 ```
 
 ### Region Setting JSON（符合 WorldQuant Brain 风格）
@@ -173,5 +201,3 @@ vsce package
 1. 在 VSCode 中打开插件项目。
 2. 按 `F5` 运行插件，VSCode 会自动启动一个新的窗口来加载并调试插件。
 3. 在 `View -> Output -> Extension Host` 查看调试日志，检查插件是否正确加载。
-
-
