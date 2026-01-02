@@ -6,6 +6,8 @@
 [![Installs](https://img.shields.io/visual-studio-marketplace/i/Roshameow.field-operator-hints)](https://marketplace.visualstudio.com/items?itemName=Roshameow.field-operator-hints)
 [![Rating](https://img.shields.io/visual-studio-marketplace/r/Roshameow.field-operator-hints)](https://marketplace.visualstudio.com/items?itemName=Roshameow.field-operator-hints)
 
+![Demo](./images/demo.gif)
+
 A lightweight VSCode extension that provides **hover documentation** and **autocompletion** for custom **data fields** and **operators**, based on your own JSON documents.
 
 Perfect for Domain Specific Languages (DSL), financial modeling DSLs, or internal operator libraries.
