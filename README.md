@@ -1,5 +1,11 @@
 # Brain DataField & Operator IntelliSense
 
+[English Version](./README_EN.md)
+
+[![Version](https://img.shields.io/visual-studio-marketplace/v/Roshameow.field-operator-hints)](https://marketplace.visualstudio.com/items?itemName=Roshameow.field-operator-hints)
+[![Installs](https://img.shields.io/visual-studio-marketplace/i/Roshameow.field-operator-hints)](https://marketplace.visualstudio.com/items?itemName=Roshameow.field-operator-hints)
+[![Rating](https://img.shields.io/visual-studio-marketplace/r/Roshameow.field-operator-hints)](https://marketplace.visualstudio.com/items?itemName=Roshameow.field-operator-hints)
+
 一个轻量级的 VSCode 插件，提供**悬停文档**和**自动补全**功能，用于自定义的**数据字段**和**运算符**，基于你自己的 JSON 文档。
 
 非常适用于领域特定语言（DSL）、金融建模 DSL 或内部运算符库。

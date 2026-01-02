@@ -3,7 +3,7 @@
   "publisher": "Roshameow",
   "displayName": "brain_snippet",
   "description": "worldquant brain platform datafields and operators autocompletion",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "engines": {
     "vscode": "^1.98.0"
   },

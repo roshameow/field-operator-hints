@@ -6,4 +6,9 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-01-02
+
+- Added support for IND region in settings snapshot.
+- Added README_EN.md for English documentation.
+
 - Initial release
