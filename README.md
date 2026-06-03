@@ -2,9 +2,10 @@
 
 [English Version](./README_EN.md)
 
-[![Version](https://img.shields.io/visual-studio-marketplace/v/Roshameow.field-operator-hints)](https://marketplace.visualstudio.com/items?itemName=Roshameow.field-operator-hints)
-[![Installs](https://img.shields.io/visual-studio-marketplace/i/Roshameow.field-operator-hints)](https://marketplace.visualstudio.com/items?itemName=Roshameow.field-operator-hints)
-[![Rating](https://img.shields.io/visual-studio-marketplace/r/Roshameow.field-operator-hints)](https://marketplace.visualstudio.com/items?itemName=Roshameow.field-operator-hints)
+[![Version](https://vsmarketplacebadges.dev/version/Roshameow.field-operator-hints.svg)](https://marketplace.visualstudio.com/items?itemName=Roshameow.field-operator-hints)
+[![Installs](https://vsmarketplacebadges.dev/installs/Roshameow.field-operator-hints.svg)](https://marketplace.visualstudio.com/items?itemName=Roshameow.field-operator-hints)
+[![Rating](https://vsmarketplacebadges.dev/rating/Roshameow.field-operator-hints.svg)](https://marketplace.visualstudio.com/items?itemName=Roshameow.field-operator-hints)
+[![License](https://img.shields.io/github/license/roshameow/field-operator-hints)](./LICENSE)
 
 ![Demo](./images/demo.gif)
 

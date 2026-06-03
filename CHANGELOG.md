@@ -6,6 +6,11 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-06-04
+
+- Updated `settings_snapshot.json` with more regions (MEA, etc.).
+- Recompiled the extension.
+
 ## [0.1.2] - 2026-01-02
 
 - Added support for IND region in settings snapshot.
