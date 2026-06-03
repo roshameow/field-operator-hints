@@ -6,6 +6,11 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-06-04
+
+- Fixed CI/CD publishing workflow (added `@vscode/vsce` dependency).
+- Optimized extension package size by excluding unnecessary files.
+
 ## [0.1.3] - 2026-06-04
 
 - Updated `settings_snapshot.json` with more regions (MEA, etc.).
